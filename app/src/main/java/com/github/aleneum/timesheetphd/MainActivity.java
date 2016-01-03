@@ -17,14 +17,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.csv.CSVFormat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,46 +31,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Calendar startCalendar = Calendar.getInstance();
-        startCalendar.set(2015, Calendar.JULY, 1);
-        Calendar endCalendar = Calendar.getInstance();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-        SimpleDateFormat durationFormat = new SimpleDateFormat("HH:mm:ss");
-        int expectedHours = 8;
-        long expectedTimeS = 0;
-        long workedTimeS = 0;
-        double expectedOvertimePercentage = 0.0;
 
         try {
-            InputStreamReader in = new InputStreamReader(this.getAssets().open("timesheet2.csv"));
-            Iterable<CSVRecord> records = CSVFormat.EXCEL.withHeader().parse(in);
-            for (CSVRecord record : records) {
-                //System.out.println(record.toString());
-                Date date = dateFormat.parse(record.get("Date"));
-                if (date.getTime() - startCalendar.getTime().getTime() > -60000 * 60 * 24) {
-                    endCalendar.setTime(date);
-                    String stringDuration = record.get("rel. Duration");
-                    workedTimeS += durationFormat.parse(stringDuration).getTime() / 1000;
-                }
-            }
-        } catch (IOException | ParseException e) {
+            InputStream in = this.getAssets().open("timesheet2.csv");
+            CSVInfoHolder info = new CSVInfoHolder("01.07.2015");
+            info.parse(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
             e.printStackTrace();
         }
-
-        int workingDays = Holidays.GERMANY_NRW.getBusinessDayCount(startCalendar.getTime(),
-        endCalendar.getTime());
-        expectedTimeS = workingDays * expectedHours * 60 * 60;
-        long forfeitOvertimeS =
-                (long) Math.floor(workingDays * expectedOvertimePercentage * expectedHours * 60 * 60);
-        long overtimeS = workedTimeS - expectedTimeS;
-        if (overtimeS > 0) {
-            overtimeS = Math.max(0, overtimeS - forfeitOvertimeS);
-        }
-
-        System.out.println("Worked " + workedTimeS / 60 / 60);
-        System.out.println("Expected " + expectedTimeS / 60 / 60);
-        System.out.println("Overtime " + (workedTimeS - expectedTimeS) / 60 / 60);
-        System.out.println("Rel. Overtime " + (overtimeS) / 60 / 60);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -94,12 +58,12 @@ public class MainActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        TextView overtime = (TextView) findViewById(R.id.textBalance);
-        System.out.println("HOURS: " + overtimeS / 60 / 60);
-        System.out.println("MINUTES: " + overtimeS % 3600 / 60);
-        System.out.println("SECONDS: " + overtimeS);
-
-        overtime.setText(String.format("%d:%02d", overtimeS / 60 / 60, overtimeS % 3600 / 60));
+//        TextView overtime = (TextView) findViewById(R.id.textBalance);
+//        System.out.println("HOURS: " + overtimeS / 60 / 60);
+//        System.out.println("MINUTES: " + overtimeS % 3600 / 60);
+//        System.out.println("SECONDS: " + overtimeS);
+//
+//        overtime.setText(String.format("%d:%02d", overtimeS / 60 / 60, overtimeS % 3600 / 60));
     }
 
     @Override
