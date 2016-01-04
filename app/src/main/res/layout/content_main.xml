@@ -12,25 +12,15 @@
     tools:context="com.github.aleneum.timesheetphd.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spinnerRange"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:spinnerMode="dropdown"
-        android:focusable="true"
-        android:entries="@array/planets_array" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="10:30"
         android:id="@+id/textBalance"
+        android:layout_marginTop="54dp"
         android:layout_below="@+id/textTitle"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp" />
+        android:textSize="48sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -38,7 +28,40 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Balance"
         android:id="@+id/textTitle"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="85dp" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/spinnerRange"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="86dp" />
+        android:id="@+id/linearLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Range "
+            android:id="@+id/textSpinner"
+            android:layout_gravity="center_vertical"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/spinnerRange"
+            android:spinnerMode="dropdown"
+            android:focusable="true"
+            android:entries="@array/planets_array"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignStart="@+id/textBalance"
+            android:background="@color/background_floating_material_light"
+            android:foregroundGravity="center_vertical" />
+
+    </LinearLayout>
+
 </RelativeLayout>

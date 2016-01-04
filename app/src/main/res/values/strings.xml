@@ -4,7 +4,9 @@
     <string-array name="planets_array">
         <item>This Week</item>
         <item>This Month</item>
+        <item>This Year</item>
         <item>Last Week</item>
         <item>Last Month</item>
+        <item>Everything</item>
     </string-array>
 </resources>

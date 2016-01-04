@@ -26,6 +26,10 @@ public class TimesheetTask {
         return date;
     }
 
+    public String getDateAsString() {
+        return Config.getInstance().getDateFormat().format(this.date).toString();
+    }
+
     public void setDate(Date date) {
         this.date = date;
     }

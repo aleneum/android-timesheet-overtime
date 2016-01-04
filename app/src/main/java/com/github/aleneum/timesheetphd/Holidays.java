@@ -189,6 +189,21 @@ public enum Holidays {
 
     protected abstract void addVariableHolidays(int year, Set<Holiday> holidays);
 
+
+    public int getBusinessDayCount(String s1, String s2) {
+        int result = 0;
+        try {
+            Date d1 = Config.getInstance().getDateFormat().parse(s1);
+            Date d2 = Config.getInstance().getDateFormat().parse(s2);
+            result = this.getBusinessDayCount(d1, d2);
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
     /**
      * Returns the number of business days between two dates.
      *
@@ -221,7 +236,7 @@ public enum Holidays {
             }
             calendar.add(Calendar.DATE, 1);
         }
-        System.out.println(dayCount);
+        //System.out.println(businessDayCount);
         return businessDayCount;
     }
 
