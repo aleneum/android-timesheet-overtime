@@ -9,7 +9,6 @@ public class Config {
     //create an object of SingleObject
     private static Config instance = new Config();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-    private SimpleDateFormat durationFormat = new SimpleDateFormat("HH:mm:ss");
 
     public final long MS_EACH_HOUR = 3600000;
 
@@ -22,19 +21,20 @@ public class Config {
         return instance;
     }
 
-    public SimpleDateFormat getDurationFormat() {
-        return this.durationFormat;
-    }
-
-    public void setDurationFormat(SimpleDateFormat durationFormat) {
-        this.durationFormat = durationFormat;
-    }
-
     public SimpleDateFormat getDateFormat() {
         return this.dateFormat;
     }
 
     public void setDateFormat(SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
+    }
+
+    public static long parseDuration(String durationString) {
+        String[] tokens = durationString.split(":");
+        int hours = Integer.parseInt(tokens[0]);
+        int minutes = Integer.parseInt(tokens[1]);
+        int seconds = Integer.parseInt(tokens[2]);
+        long duration = 3600000 * hours + 60000 * minutes + seconds;
+        return duration;
     }
 }

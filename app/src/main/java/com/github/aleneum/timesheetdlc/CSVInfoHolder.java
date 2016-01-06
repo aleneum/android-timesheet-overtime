@@ -34,8 +34,7 @@ public class CSVInfoHolder {
             for (CSVRecord record : records) {
                 Date date = Config.getInstance().getDateFormat().parse(record.get("Date"));
                 String stringDuration = record.get("rel. Duration");
-                long duration = Config.getInstance().getDurationFormat().parse(stringDuration).getTime();
-                duration += Config.getInstance().MS_EACH_HOUR;
+                long duration = Config.parseDuration(stringDuration);
                 if (duration <= 0) return;
                 String tags = record.get("Tags");
                 this.tasks.add(new TimesheetTask(date, duration, tags));
