@@ -1,9 +1,11 @@
-package com.github.aleneum.timesheetphd;
+package com.github.aleneum.timesheetdlc;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -22,12 +24,10 @@ import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.FileChannel;
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
-        sharedPref = getPreferences(MODE_PRIVATE);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/csv".equals(type)) {
@@ -92,21 +92,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         Spinner spinner = (Spinner) findViewById(R.id.spinnerRange);
         spinner.setOnItemSelectedListener(this);
-        spinner.setSelection(sharedPref.getInt("spinnerPos",0));
+        spinner.setSelection(sharedPref.getInt("spinnerPos", 0));
 
     }
 
@@ -122,12 +114,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Log.i(TAG, "Overtime: " + calculator.getOvertime() / ms);
 
         TextView balance = (TextView) findViewById(R.id.textBalance);
-        int hours = (int) Math.floor(calculator.getOvertime() / ms);
+        String sign = "";
+
+        if (calculator.getOvertime() < 0) {
+            balance.setTextColor(Color.RED);
+            sign += "-";
+        } else {
+            balance.setTextColor(Color.BLACK);
+        }
+
+        int hours = (int) Math.abs(calculator.getOvertime() / ms);
         int minutes = (int) Math.abs(calculator.getOvertime() % 3600000 / 60000);
 
-        balance.setText(String.format("%d:%02d", hours, minutes));
+        balance.setText(String.format("%s%d:%02d", sign, hours, minutes));
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -145,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.github.aleneum.timesheetphd/http/host/path")
+                Uri.parse("android-app://com.github.aleneum.timesheetdlc/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -185,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.github.aleneum.timesheetphd/http/host/path")
+                Uri.parse("android-app://com.github.aleneum.timesheetdlc/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
@@ -225,6 +227,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             default: // Everything
                 break;
         }
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt("spinnerPos", position);
+        editor.commit();
         updateBalance(start, end);
     }
 

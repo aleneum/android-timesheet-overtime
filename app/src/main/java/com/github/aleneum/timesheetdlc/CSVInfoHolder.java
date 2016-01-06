@@ -1,13 +1,11 @@
-package com.github.aleneum.timesheetphd;
+package com.github.aleneum.timesheetdlc;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Time;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +35,8 @@ public class CSVInfoHolder {
                 Date date = Config.getInstance().getDateFormat().parse(record.get("Date"));
                 String stringDuration = record.get("rel. Duration");
                 long duration = Config.getInstance().getDurationFormat().parse(stringDuration).getTime();
+                duration += Config.getInstance().MS_EACH_HOUR;
+                if (duration <= 0) return;
                 String tags = record.get("Tags");
                 this.tasks.add(new TimesheetTask(date, duration, tags));
             }

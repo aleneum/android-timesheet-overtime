@@ -1,4 +1,4 @@
-package com.github.aleneum.timesheetphd;
+package com.github.aleneum.timesheetdlc;
 
 import java.text.SimpleDateFormat;
 

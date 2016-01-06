@@ -1,6 +1,5 @@
-package com.github.aleneum.timesheetphd;
+package com.github.aleneum.timesheetdlc;
 
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.github.aleneum.timesheetphd.MainActivity"
+    tools:context="com.github.aleneum.timesheetdlc.MainActivity"
     tools:showIn="@layout/activity_main">
 
     <TextView
@@ -17,10 +17,10 @@
         android:layout_height="wrap_content"
         android:text="10:30"
         android:id="@+id/textBalance"
-        android:layout_marginTop="54dp"
+        android:textSize="48sp"
         android:layout_below="@+id/textTitle"
         android:layout_centerHorizontal="true"
-        android:textSize="48sp" />
+        android:layout_marginTop="42dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -28,9 +28,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Balance"
         android:id="@+id/textTitle"
+        android:layout_marginTop="115dp"
         android:layout_below="@+id/linearLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="85dp" />
+        android:layout_centerHorizontal="true" />
 
     <LinearLayout
         android:orientation="horizontal"

@@ -1,4 +1,4 @@
-package com.github.aleneum.timesheetphd;
+package com.github.aleneum.timesheetdlc;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
