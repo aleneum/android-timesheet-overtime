@@ -12,19 +12,21 @@ public class OvertimeCalculator {
     long overtime = 0;
     int expectedHours = 0;
     double expectedOvertimePercentage = 0.0;
+    boolean workingDaysOnly = true;
 
     public OvertimeCalculator(CSVInfoHolder holder) {
         this(holder, 8);
     }
 
     public OvertimeCalculator(CSVInfoHolder holder, int hours) {
-        this(holder, hours, 0);
+        this(holder, hours, 0, true);
     }
 
-    public OvertimeCalculator(CSVInfoHolder holder, int hours, double overtime) {
+    public OvertimeCalculator(CSVInfoHolder holder, int hours, double overtime, boolean workingDaysOnly) {
         this.holder = holder;
         this.expectedHours = hours;
         this.expectedOvertimePercentage = overtime;
+        this.workingDaysOnly = workingDaysOnly;
     }
 
     public void process(String start, String end, String[] tags) {
@@ -47,8 +49,13 @@ public class OvertimeCalculator {
         for (TimesheetTask t: tasks) {
             this.workingTime += t.getDuration();
         }
-        this.expectedTime = Holidays.GERMANY_NRW.getBusinessDayCount(start, end)
-                * expectedHours * Config.getInstance().MS_EACH_HOUR;
+
+        if (workingDaysOnly) {
+            this.expectedTime = Holidays.GERMANY_NRW.getBusinessDayCount(start, end);
+        } else {
+            this.expectedTime = Holidays.GERMANY_NRW.getDateDiff(start, end);
+        }
+        this.expectedTime = this.expectedTime * expectedHours * Config.getInstance().MS_EACH_HOUR;
         this.overtime = this.workingTime - this.expectedTime;
         if (this.overtime > 0) {
             this.overtime -= this.expectedTime * this.expectedOvertimePercentage;
@@ -93,5 +100,21 @@ public class OvertimeCalculator {
 
     public void setExpectedOvertimePercentage(double expectedOvertimePercentage) {
         this.expectedOvertimePercentage = expectedOvertimePercentage;
+    }
+
+    public CSVInfoHolder getHolder() {
+        return holder;
+    }
+
+    public void setHolder(CSVInfoHolder holder) {
+        this.holder = holder;
+    }
+
+    public boolean isWorkingDaysOnly() {
+        return workingDaysOnly;
+    }
+
+    public void setWorkingDaysOnly(boolean workingDaysOnly) {
+        this.workingDaysOnly = workingDaysOnly;
     }
 }

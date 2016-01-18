@@ -14,8 +14,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.google.android.gms.appindexing.Action;
@@ -39,9 +42,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-    CSVInfoHolder info = new CSVInfoHolder();
-    OvertimeCalculator calculator = new OvertimeCalculator(info);
-    SharedPreferences sharedPref;
+    private CSVInfoHolder info = new CSVInfoHolder();
+    private OvertimeCalculator calculator = new OvertimeCalculator(info);
+    private SharedPreferences sharedPref;
+    private TableRow.LayoutParams col1, col2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +55,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         String action = intent.getAction();
         String type = intent.getType();
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        col1 = new TableRow.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        col1.column = 1;
+        col2 = new TableRow.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        col2.setMargins(10, 0, 0, 0);
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/csv".equals(type)) {
@@ -77,14 +90,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             if (last.exists()) {
                 in = new FileInputStream(last);
             } else {
-                in = this.getAssets().open("timesheet2.csv");
+                in = this.getAssets().open("timesheet.csv");
             }
             info = new CSVInfoHolder();
             info.parse(in);
-            calculator = new OvertimeCalculator(
-                    info,
-                    sharedPref.getInt("hours", 8),
-                    sharedPref.getFloat("overtime", 0.0f));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -103,30 +112,71 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void updateBalance(String start, String end) {
-
-        Log.i(TAG, "Balance from " + start + " to " + end);
-        calculator.process(start, end);
-
         double ms = Config.getInstance().MS_EACH_HOUR;
 
-        Log.i(TAG, "Worked: " + calculator.getWorkingTime() / ms);
-        Log.i(TAG, "Expected: " + calculator.getExpectedTime() / ms);
-        Log.i(TAG, "Overtime: " + calculator.getOvertime() / ms);
+        CSVInfoHolder holder = new CSVInfoHolder(this.info.getPeriod(start, end));
+        calculator.setHolder(holder);
+        TableLayout table = (TableLayout) findViewById(R.id.tableOverview);
+        table.removeAllViews();
 
-        TextView balance = (TextView) findViewById(R.id.textBalance);
-        String sign = "";
+        for (String project: holder.getProjects()) {
+            Log.i(TAG, "project: " + project);
+            holder.setCurrentProject(project);
+            calculator.setExpectedHours(sharedPref.getInt(String.format("%s.hours", project), 8));
+            calculator.setExpectedOvertimePercentage(sharedPref.getFloat(
+                    String.format("%s.overtime", project), 1));
+            calculator.setWorkingDaysOnly(sharedPref.getBoolean(
+                    String.format("%s.workingDaysOnly", project), true));
+            calculator.process(start, end);
+            Log.i(TAG, "overtime: " + calculator.getOvertime());
 
-        if (calculator.getOvertime() < 0) {
-            balance.setTextColor(Color.RED);
-            sign += "-";
-        } else {
-            balance.setTextColor(Color.BLACK);
+            TableRow row = new TableRow(this);
+            TextView projectName = new TextView(this);
+            projectName.setTextSize(20);
+            TextView balance = new TextView(this);
+            balance.setTextSize(20);
+
+            projectName.setText(project);
+
+            String sign = "";
+            if (calculator.getOvertime() < 0) {
+                balance.setTextColor(Color.RED);
+                sign += "-";
+            } else {
+                balance.setTextColor(Color.BLACK);
+                sign += "  ";
+            }
+            int hours = (int) Math.abs(calculator.getOvertime() / ms);
+            int minutes = (int) Math.abs(calculator.getOvertime() % 3600000 / 60000);
+            balance.setText(String.format("%s%d:%02d", sign, hours, minutes));
+
+            row.addView(projectName, col1);
+            row.addView(balance, col2);
+            table.addView(row);
         }
 
-        int hours = (int) Math.abs(calculator.getOvertime() / ms);
-        int minutes = (int) Math.abs(calculator.getOvertime() % 3600000 / 60000);
-
-        balance.setText(String.format("%s%d:%02d", sign, hours, minutes));
+//        Log.i(TAG, "Balance from " + start + " to " + end);
+//        calculator.process(start, end);
+//
+//
+//        Log.i(TAG, "Worked: " + calculator.getWorkingTime() / ms);
+//        Log.i(TAG, "Expected: " + calculator.getExpectedTime() / ms);
+//        Log.i(TAG, "Overtime: " + calculator.getOvertime() / ms);
+//
+//        TextView balance = (TextView) findViewById(R.id.textBalance);
+//        String sign = "";
+//
+//        if (calculator.getOvertime() < 0) {
+//            balance.setTextColor(Color.RED);
+//            sign += "-";
+//        } else {
+//            balance.setTextColor(Color.BLACK);
+//        }
+//
+//        int hours = (int) Math.abs(calculator.getOvertime() / ms);
+//        int minutes = (int) Math.abs(calculator.getOvertime() % 3600000 / 60000);
+//
+//        balance.setText(String.format("%s%d:%02d", sign, hours, minutes));
     }
 
     @Override
@@ -146,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra("projects", this.info.getProjects());
             startActivity(intent);
             return true;
         }
